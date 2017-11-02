@@ -21,3 +21,9 @@ print invRandMat
 
 # 矩阵相乘
 print invRandMat * randMat
+
+
+c = array([[0, 2, 1], [3, 5, 7], [0, 1, 1]])
+print c.sum()
+print c.sum(axis=0)
+print c.sum(axis=1)
