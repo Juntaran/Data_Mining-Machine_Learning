@@ -8,6 +8,7 @@
 
 from math import log
 import operator
+import treePlotter
 
 # 即计算给定数据集的香农熵
 def calcShannonEnt(dataSet):
@@ -81,6 +82,7 @@ def majorityCnt(classList):
     sortedClassCount = sorted(classCount.iteritems(), key=operator.itemgetter(1), reverse=True)
     return sortedClassCount[0][0]
 
+
 # 创建树
 def createTree(dataSet, labels):
 
@@ -97,7 +99,7 @@ def createTree(dataSet, labels):
     myTree = {bestFeatLabel: {}}
 
     # 得到列表包含的所有属性值
-    del(labels[bestFeat])
+    del(labels[bestFeat])   # 解引用
     featValues = [example[bestFeat] for example in dataSet]
     uniqueVals = set(featValues)
     for value in uniqueVals:
@@ -105,6 +107,33 @@ def createTree(dataSet, labels):
         myTree[bestFeatLabel][value] = createTree(splitDataSet(dataSet, bestFeat, value), subLabels)
 
     return myTree
+
+
+# 使用决策树的分类函数
+def classify(inputTree, featLabels, testVec):
+    firstStr = inputTree.keys()[0]
+    secondDict = inputTree[firstStr]
+    # 标签字符串转换为索引
+    featIndex = featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            if type(secondDict[key]).__name__ == 'dict':
+                classLabel = classify(secondDict[key], featLabels, testVec)
+            else:
+                classLabel = secondDict[key]
+    return classLabel
+
+# 使用 pickle 模块存储决策树
+def storeTree(inputTree, filename):
+    import pickle
+    fw = open(filename, 'w')
+    pickle.dump(inputTree, fw)
+    fw.close()
+
+def grabTree(filename):
+    import pickle
+    fr = open(filename)
+    return pickle.loads(fr)
 
 
 def createDataSet():
@@ -116,21 +145,28 @@ def createDataSet():
     labels = ['no surfacing', 'flippers']
     return dataSet, labels
 
-testData, labels = createDataSet()
-print testData
-print calcShannonEnt(testData)
+# testData, labels = createDataSet()
+# print testData
+# print calcShannonEnt(testData)
+#
+# # 熵越高代表混合的数据越多treePlotter
+# testData[0][-1] = 'maybe'
+# print testData
+# print calcShannonEnt(testData)
+#
+# testData[0][-1] = 'yes'
+# print splitDataSet(testData, 0, 1)
+# print splitDataSet(testData, 0, 0)
+#
+# print chooseBestFeatureToSplit(testData)
+# print testData
 
-# 熵越高代表混合的数据越多
-testData[0][-1] = 'maybe'
-print testData
-print calcShannonEnt(testData)
+## testTree = createTree(testData, labels)
+## print testTree
 
-testData[0][-1] = 'yes'
-print splitDataSet(testData, 0, 1)
-print splitDataSet(testData, 0, 0)
-
-print chooseBestFeatureToSplit(testData)
-print testData
-
-testTree = createTree(testData, labels)
-print testTree
+# print labels
+# myTree = treePlotter.retrieveTree(0)
+# print myTree
+#
+# print classify(myTree, labels, [1, 0])
+# print classify(myTree, labels, [1, 1])
